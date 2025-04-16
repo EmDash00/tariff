@@ -37,30 +37,32 @@ def _get_trump_phrase():
     return random.choice(_trump_phrases)
 
 
+def manufacture_float(x: float, depth: int = 10):
+    if depth == 0:
+        return x
+    return sqrt(tan(cos(sin(manufacture_float(x, depth - 1)))) ** 2)
+
+
+def domestic_float_factory(T: float):
+    t = time.time()
+    while time.time() - t < T:
+        yield 1 / manufacture_float(time.time())
+
+
+def work(T: float, process_id: int):
+    """
+    Do work on all CPU cores for T seconds.
+    Float generation the likes of which have NEVER been SEEN before.
+
+    Args:
+        T (float): The time in seconds to apply the tariff for.
+    """
+
+    [n for n in domestic_float_factory(T)]
+
+
 def apply_tariff(T: float):
     """Duplicate the same calculation across all cores"""
-
-    def work(T: float, process_id: int):
-        """
-        Do work on all CPU cores for T seconds.
-        Float generation the likes of which have NEVER been SEEN before.
-
-        Args:
-            T (float): The time in seconds to apply the tariff for.
-        """
-
-        t = time.time()
-
-        def manufacture_float(x: float, depth: int = 10):
-            if depth == 0:
-                return
-            return sqrt(tan(cos(sin(manufacture_float(x, depth - 1)))) ** 2)
-
-        def domestic_float_factory():
-            while time.time() - t < T:
-                yield 1 / manufacture_float(time.time())
-
-        [n for n in domestic_float_factory()]
 
     num_cores = multiprocessing.cpu_count()
     with multiprocessing.Pool(processes=num_cores) as pool:
@@ -104,7 +106,9 @@ def _tariffed_import(name, globals=None, locals=None, fromlist=(), level=0):
         # Calculate sleep time based on tariff rate
         tariff_time = original_import_time * (tariff_rate / 100)
 
+        builtins.__import__ = original_import
         apply_tariff(tariff_time / 1000000)
+        builtins.__import__ = _tariffed_import
 
         # Calculate new total time
         new_total_time = original_import_time + tariff_time
